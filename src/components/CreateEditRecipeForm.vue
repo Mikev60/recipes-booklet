@@ -1,12 +1,13 @@
 <template>
-    <h2>Create / Edit a recipe</h2>
+    <h2>{{ recipeToEdit.id ? `Edit a recipe` : 'Create a recipe' }}</h2>
     <v-alert :text="alert_text" :type="alert_type" v-if="show_alert"></v-alert>
     <v-form class="w-full mt-4" @submit.prevent="submitForm" ref="formRef">
         <!-- Title, Picture inputs-->
         <v-text-field :rules="rules.title.rules" label="Title" v-model="recipe_title">
 
         </v-text-field>
-        <v-file-input preprend-icon="mdi-camera" label="Picture" v-model="recipe_picture"></v-file-input>
+        <v-file-input v-if="!recipeToEdit.id" preprend-icon="mdi-camera" label="Picture"
+            v-model="recipe_picture"></v-file-input>
         <!-- Ingredients-->
         <v-container class="px-0 mx-0 w-full">
             <v-row>
@@ -53,7 +54,7 @@
 
                 <v-textarea label="Description" v-model="step.description"
                     :rules="rules.step_description.rules"></v-textarea>
-                <v-file-input label="Pictures" multiple v-model="step.pictures"></v-file-input>
+                <v-file-input v-if="!recipeToEdit.id" label="Pictures" multiple v-model="step.pictures"></v-file-input>
             </v-container>
 
 
@@ -67,12 +68,18 @@
 </template>
 
 <script>
-import { ref } from 'vue'
-import { addRecipe } from '@/includes/collections/recipes'
+import { ref, watch } from 'vue'
+import { addRecipe, editRecipe } from '@/includes/collections/recipes'
 
 export default {
     name: 'CreateEditRecipeForm',
-    setup() {
+    props: {
+        recipe: {
+            type: Object,
+            required: false
+        }
+    },
+    setup(props) {
         // Validation rules
         let rules = {
             title: {
@@ -134,12 +141,23 @@ export default {
         let show_alert = ref(false)
         let alert_text = ref('')
         let alert_type = ref('')
+        let in_submission = ref(false)
         let units = ['gr', 'kg', 'L', 'ml', 'cl', 'u']
+
+        // Recipe value initialization
         let recipe_title = ref('')
         let recipe_picture = ref(null)
-        let in_submission = ref(false)
-
+        let recipeToEdit = ref(props.recipe || {})
         let ingredients = ref([])
+        let steps = ref([])
+        watch(() => props.recipe, (newRecipe) => { //Change recipe when props is initialized
+            recipeToEdit.value = newRecipe
+            recipe_title.value = recipeToEdit.value.title
+            recipe_picture.value = recipeToEdit.value.main_picture
+            steps.value = recipeToEdit.value.steps
+            ingredients.value = recipeToEdit.value.ingredients
+        })
+
         function addIngredient() {
             const ingredientTemplate = {
                 name: '',
@@ -151,8 +169,6 @@ export default {
         function removeIngredient(index) {
             ingredients.value.splice(index, 1)
         }
-
-        let steps = ref([])
         function addStep() {
             let stepTemplate = {
                 title: '',
@@ -164,7 +180,6 @@ export default {
         function removeStep(index) {
             steps.value.splice(index, 1)
         }
-
         async function submitForm() {
             in_submission.value = true
             const recipe = {
@@ -172,14 +187,19 @@ export default {
                 ingredients: ingredients.value
             }
             try {
-
-                await addRecipe(recipe, recipe_picture.value, steps.value)
+                if (recipeToEdit.value.id) {
+                    await editRecipe(recipeToEdit.value.id, recipe, steps.value)
+                    alert_text.value = 'You recipe has been edited';
+                } else {
+                    await addRecipe(recipe, recipe_picture.value, steps.value)
+                    formRef.value.reset()
+                    ingredients.value = []
+                    steps.value = []
+                    alert_text.value = 'You recipe has been added';
+                }
                 show_alert.value = true;
                 alert_type.value = 'success';
-                alert_text.value = 'You recipe has been added';
-                formRef.value.reset()
-                ingredients.value = []
-                steps.value = []
+
 
             } catch (error) {
                 show_alert.value = true;
@@ -194,7 +214,6 @@ export default {
             }, 2000);
             in_submission.value = false
         }
-
 
         return {
             rules,
@@ -212,7 +231,8 @@ export default {
             alert_text,
             alert_type,
             formRef,
-            in_submission
+            in_submission,
+            recipeToEdit
         }
     }
 }

@@ -8,7 +8,7 @@
       </v-tabs>
       <v-tabs-window v-model="tab" class="pt-2">
         <v-tabs-window-item value="list">
-          <recipes-list :recipes="recipes"></recipes-list>
+          <recipes-list type="admin" :recipes="recipes"></recipes-list>
         </v-tabs-window-item>
 
         <v-tabs-window-item value="create">
@@ -37,6 +37,8 @@ export default {
 
     async function initializeRecipes() {
       recipes.value = await getRecipes()
+
+      console.log(recipes)
     }
 
     initializeRecipes()

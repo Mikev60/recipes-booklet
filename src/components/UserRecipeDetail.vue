@@ -16,10 +16,10 @@
                     <v-expansion-panel :title="`Step ${index + 1} : ${step.title}`">
                         <v-expansion-panel-text class="flex flex-col ">
                             <v-row class="mt-1">{{ step.description }}</v-row>
-                            <v-container max-width="60%" class="mt-2">
+                            <v-container class="mt-2 max-w-2">
                                 <v-row class="mt-1"><v-carousel>
                                         <v-carousel-item v-for="picture in step.pictures" :src="picture.url"
-                                            cover></v-carousel-item></v-carousel></v-row>
+                                            contain></v-carousel-item></v-carousel></v-row>
                             </v-container>
                         </v-expansion-panel-text>
                     </v-expansion-panel>

@@ -10,11 +10,12 @@
             v-model="recipe_picture"></v-file-input>
         <!-- Ingredients-->
         <v-container class="px-0 mx-0 w-full">
-            <v-row>
-                <v-col cols="2">
+            <v-row align-content="end" justify="end">
+                <v-col col="1">
                     <h3>Ingredients</h3>
                 </v-col>
-                <v-col><v-icon icon="mdi-plus" @click.prevent="addIngredient"></v-icon></v-col>
+                <v-col align-self="end"><v-icon icon="mdi-plus" @click.prevent="addIngredient"
+                        class="items-end"></v-icon></v-col>
             </v-row>
             <v-row align="center" v-for="(ingredient, index) in ingredients" :key="index">
                 <v-col>
@@ -38,7 +39,7 @@
         <!-- Steps-->
         <v-container class="px-0 mx-0">
             <v-row no-gutters>
-                <v-col cols="1">
+                <v-col>
                     <h3>Steps</h3>
                 </v-col>
                 <v-col><v-icon icon="mdi-plus" @click.prevent="addStep"></v-icon></v-col>

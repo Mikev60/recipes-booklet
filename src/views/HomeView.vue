@@ -28,6 +28,6 @@ export default {
 
 <template>
   <main class="px-4 py-4">
-    <recipes-list :recipes="recipes"></recipes-list>
+    <recipes-list type="user" :recipes="recipes"></recipes-list>
   </main>
 </template>

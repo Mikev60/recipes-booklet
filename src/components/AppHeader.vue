@@ -1,23 +1,13 @@
 <template>
     <v-app-bar :elevation="2" color="primary">
-        <template v-slot:prepend>
-            <v-app-bar-nav-icon @click.prevent="drawOpened = !drawOpened"></v-app-bar-nav-icon>
+
+        <v-app-bar-title class="cursor-pointer" @click.prevent="navigateTo('home')">Recipes booklet</v-app-bar-title>
+        <template v-slot:append>
+            <v-btn class="cursor-pointer" @click.prevent="navigateTo('home')">Recipes</v-btn>
+            <v-btn class="cursor-pointer" @click.prevent="navigateTo('admin')">Admin</v-btn>
         </template>
 
-        <v-app-bar-title>Recipes booklet</v-app-bar-title>
-
     </v-app-bar>
-
-    <v-navigation-drawer v-if="drawOpened" color="primary">
-        <v-list-item v-for="(item, i) in items" :key="i" :value="item" color="primary" variant="plain"
-            @click.prevent="navigateTo(item.route)">
-            <template v-slot:prepend>
-                <v-icon :icon="item.icon"></v-icon>
-            </template>
-
-            <v-list-item-title v-text="item.text"></v-list-item-title>
-        </v-list-item>
-    </v-navigation-drawer>
 </template>
 
 <script>

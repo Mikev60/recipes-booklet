@@ -49,7 +49,7 @@ async function addRecipe(recipe, mainPicture, steps) {
       await uploadBytes(pictureRef, picture);
       const pictureUrl = await getDownloadURL(pictureRef);
       stepPictures.push({
-        pictureUrl,
+        url: pictureUrl,
         path: picturePath,
       });
       modifiedSteps[index].pictures = stepPictures;

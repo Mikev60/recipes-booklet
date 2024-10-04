@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import AdminView from "@/views/AdminView.vue";
 import AdminRecipeDetail from "@/components/AdminRecipeDetail.vue";
+import UserRecipeDetail from "@/components/UserRecipeDetail.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,6 +21,11 @@ const router = createRouter({
       path: "/admin/recipe/:id",
       name: "admin recipe detail",
       component: AdminRecipeDetail,
+    },
+    {
+      path: "/recipe/:id",
+      name: "user recipe detail",
+      component: UserRecipeDetail,
     },
   ],
 });

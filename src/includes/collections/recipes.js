@@ -53,11 +53,19 @@ async function addRecipe(recipe, mainPicture, steps) {
   });
 }
 
-async function editRecipe(id, recipe, steps) {
+async function editRecipe(id, recipe, steps, mainPicture) {
+  // Upload main picture
+  const mainPicturePath = `${id}/${mainPicture.name}`;
+  const mainPictureUrl = await uploadFile(mainPicturePath, mainPicture);
+
   console.log("edit");
   const docRef = doc(db, "recipes", id);
   updateDoc(docRef, {
     ...recipe,
+    main_picture: {
+      url: mainPictureUrl,
+      path: mainPicturePath,
+    },
     steps,
   });
 }

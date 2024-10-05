@@ -2,7 +2,8 @@
 
 Next features :
 
-- Edit pictures in admin panel
+- Edit step pictures in admin panel
+- Optimize picture upload : delete previous that are not used anymore
 - Go to no-vuetify and custom css with tailwind
 - Delete a recipe
 - Ingredient category

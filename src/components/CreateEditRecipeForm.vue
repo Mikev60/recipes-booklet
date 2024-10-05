@@ -6,8 +6,9 @@
         <v-text-field :rules="rules.title.rules" label="Title" v-model="recipe_title">
 
         </v-text-field>
-        <v-file-input v-if="!recipeToEdit.id" preprend-icon="mdi-camera" label="Picture"
-            v-model="recipe_picture"></v-file-input>
+        <v-file-input preprend-icon="mdi-camera" label="Picture" @change="addMainPicture"
+            v-model="temp_recipe_picture"></v-file-input>
+        <img :src="recipe_picture.url" v-if="recipe_picture?.url" />
         <!-- Ingredients-->
         <v-container class="px-0 mx-0 w-full">
             <v-row align-content="end" justify="end">
@@ -147,6 +148,7 @@ export default {
 
         // Recipe value initialization
         let recipe_title = ref('')
+        let temp_recipe_picture = ref(null)
         let recipe_picture = ref(null)
         let recipeToEdit = ref(props.recipe || {})
         let ingredients = ref([])
@@ -158,6 +160,13 @@ export default {
             steps.value = recipeToEdit.value.steps
             ingredients.value = recipeToEdit.value.ingredients
         })
+
+        function addMainPicture() {
+            // Create temporary url to display imagepreview
+            recipe_picture.value = temp_recipe_picture.value
+            recipe_picture.value.url = URL.createObjectURL(temp_recipe_picture.value);
+            temp_recipe_picture.value = null
+        }
 
         function addIngredient() {
             const ingredientTemplate = {
@@ -189,7 +198,7 @@ export default {
             }
             try {
                 if (recipeToEdit.value.id) {
-                    await editRecipe(recipeToEdit.value.id, recipe, steps.value)
+                    await editRecipe(recipeToEdit.value.id, recipe, steps.value, recipe_picture.value)
                     alert_text.value = 'You recipe has been edited';
                 } else {
                     await addRecipe(recipe, recipe_picture.value, steps.value)
@@ -233,7 +242,9 @@ export default {
             alert_type,
             formRef,
             in_submission,
-            recipeToEdit
+            recipeToEdit,
+            addMainPicture,
+            temp_recipe_picture
         }
     }
 }

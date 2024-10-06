@@ -6,6 +6,7 @@ import {
   uploadFile,
   updateDocument,
   createDocument,
+  deleteFile,
 } from "../firebase-util";
 
 async function getRecipes() {
@@ -14,7 +15,6 @@ async function getRecipes() {
 }
 
 async function getSingleRecipe(recipeId) {
-  console.log("fait avec firebase");
   let recipe = await getSingleDocument(recipeId, "recipes");
   return recipe;
 }
@@ -41,7 +41,6 @@ async function addRecipe(recipe, mainPicture, steps) {
       modifiedSteps[index].pictures = stepPictures;
     }
   }
-  console.log(modifiedSteps);
 
   //Update document with pictures urls
   await updateDocument("recipes", recipeResult.id, {
@@ -53,13 +52,59 @@ async function addRecipe(recipe, mainPicture, steps) {
   });
 }
 
-async function editRecipe(id, recipe, steps, mainPicture) {
-  // Upload main picture
-  const mainPicturePath = `${id}/${mainPicture.name}`;
-  const mainPictureUrl = await uploadFile(mainPicturePath, mainPicture);
+async function editRecipe(id, recipe, steps, mainPicture, filesToDelete) {
+  let currentRecipe = await getSingleRecipe(id);
 
-  console.log("edit");
+  // Upload main picture
+  let mainPictureUrl, mainPicturePath;
+  if (!mainPicture.url.includes("firebase")) {
+    mainPicturePath = `${id}/${mainPicture.name}`;
+    mainPictureUrl = await uploadFile(mainPicturePath, mainPicture);
+  } else {
+    mainPicturePath = mainPicture.path;
+    mainPictureUrl = mainPicture.url;
+  }
   const docRef = doc(db, "recipes", id);
+
+  for (let index = 0; index < steps.length; index++) {
+    //Upload pictures which are not uploaded yet
+    for (let picture of steps[index].pictures) {
+      let picturesCopy = [...steps[index].pictures];
+      console.log(picture);
+      if (!picture.url.includes("firebase")) {
+        const picturePath = `${id}/steps/${index}/${picture.name}`;
+        console.log(picturePath, picture);
+        const pictureUrl = await uploadFile(picturePath, picture);
+        picturesCopy.splice(
+          steps[index].pictures.findIndex(
+            (element) => element.url == picture.url
+          ),
+          1
+        );
+        picturesCopy.push({
+          url: pictureUrl,
+          path: picturePath,
+        });
+      }
+      steps[index].pictures = picturesCopy;
+    }
+  }
+
+  //Delete pictures that are not used anymore
+  filesToDelete.forEach(async (file) => {
+    if (file.path) {
+      await deleteFile(file.path);
+    }
+  });
+
+  console.log({
+    ...recipe,
+    main_picture: {
+      url: mainPictureUrl,
+      path: mainPicturePath,
+    },
+    steps,
+  });
   updateDoc(docRef, {
     ...recipe,
     main_picture: {

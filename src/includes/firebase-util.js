@@ -11,6 +11,7 @@ import {
   uploadBytes,
   ref as refFunction,
   getDownloadURL,
+  deleteObject,
 } from "firebase/storage";
 
 async function getCollectionDocuments(CollectionRef) {
@@ -52,10 +53,16 @@ async function createDocument(collectionRef, valueObject) {
   return queryResult;
 }
 
+async function deleteFile(filePath) {
+  const fileRef = refFunction(storageRef, filePath);
+  await deleteObject(fileRef);
+}
+
 export {
   getCollectionDocuments,
   getSingleDocument,
   uploadFile,
   updateDocument,
   createDocument,
+  deleteFile,
 };

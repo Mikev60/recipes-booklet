@@ -8,7 +8,7 @@
         </v-text-field>
         <v-file-input preprend-icon="mdi-camera" label="Picture" @change="addMainPicture"
             v-model="temp_recipe_picture"></v-file-input>
-        <img :src="recipe_picture.url" v-if="recipe_picture?.url" />
+        <img :src="recipe_picture.url" width="200" v-if="recipe_picture?.url" />
         <!-- Ingredients-->
         <v-container class="px-0 mx-0 w-full">
             <v-row align-content="end" justify="end">
@@ -56,7 +56,16 @@
 
                 <v-textarea label="Description" v-model="step.description"
                     :rules="rules.step_description.rules"></v-textarea>
-                <v-file-input v-if="!recipeToEdit.id" label="Pictures" multiple v-model="step.pictures"></v-file-input>
+                <v-file-input label="Pictures" multiple v-model="temp_step_pictures"
+                    @change="addStepPicture(index)"></v-file-input>
+                <div v-if="recipe.steps.length > 0">
+                    <div class="flex flex-row" v-for="(picture, pictureIndex) in step.pictures" :key="picture.url">
+                        <div class="relative"><img width="200" :src="picture.url" /><v-icon class="absolute top-0 right-0"
+                                icon="mdi-delete-circle" color="error"
+                                @click.prevent="removePicture(index, pictureIndex)"></v-icon></div>
+                    </div>
+
+                </div>
             </v-container>
 
 
@@ -145,10 +154,12 @@ export default {
         let alert_type = ref('')
         let in_submission = ref(false)
         let units = ['gr', 'kg', 'L', 'ml', 'cl', 'u']
+        let filesToDelete = ref([])
 
         // Recipe value initialization
         let recipe_title = ref('')
         let temp_recipe_picture = ref(null)
+        let temp_step_pictures = ref(null)
         let recipe_picture = ref(null)
         let recipeToEdit = ref(props.recipe || {})
         let ingredients = ref([])
@@ -162,12 +173,21 @@ export default {
         })
 
         function addMainPicture() {
+            filesToDelete.value.push(recipe_picture.value)
             // Create temporary url to display imagepreview
             recipe_picture.value = temp_recipe_picture.value
             recipe_picture.value.url = URL.createObjectURL(temp_recipe_picture.value);
             temp_recipe_picture.value = null
         }
-
+        function addStepPicture(stepIndex) {
+            temp_step_pictures.value.forEach((stepPicture) => {
+                let currentStep = steps.value[stepIndex]
+                currentStep.pictures.push(stepPicture)
+                currentStep.pictures[currentStep.pictures.length - 1].url = URL.createObjectURL(currentStep.pictures[steps.value[stepIndex].pictures.length - 1])
+            }
+            )
+            temp_step_pictures.value = null
+        }
         function addIngredient() {
             const ingredientTemplate = {
                 name: '',
@@ -198,8 +218,9 @@ export default {
             }
             try {
                 if (recipeToEdit.value.id) {
-                    await editRecipe(recipeToEdit.value.id, recipe, steps.value, recipe_picture.value)
+                    await editRecipe(recipeToEdit.value.id, recipe, steps.value, recipe_picture.value, filesToDelete.value)
                     alert_text.value = 'You recipe has been edited';
+                    filesToDelete.value = []
                 } else {
                     await addRecipe(recipe, recipe_picture.value, steps.value)
                     formRef.value.reset()
@@ -224,6 +245,10 @@ export default {
             }, 2000);
             in_submission.value = false
         }
+        function removePicture(stepIndex, pictureIndex) {
+            filesToDelete.value.push(steps.value[stepIndex].pictures[pictureIndex])
+            steps.value[stepIndex].pictures.splice(pictureIndex, 1)
+        }
 
         return {
             rules,
@@ -244,7 +269,10 @@ export default {
             in_submission,
             recipeToEdit,
             addMainPicture,
-            temp_recipe_picture
+            temp_recipe_picture,
+            removePicture,
+            temp_step_pictures,
+            addStepPicture
         }
     }
 }

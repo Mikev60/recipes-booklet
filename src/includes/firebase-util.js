@@ -6,6 +6,7 @@ import {
   doc,
   getDoc,
   collection,
+  deleteDoc,
 } from "firebase/firestore";
 import {
   uploadBytes,
@@ -58,6 +59,11 @@ async function deleteFile(filePath) {
   await deleteObject(fileRef);
 }
 
+async function deleteDocument(collectionString, documentID) {
+  const docRef = doc(db, collectionString, documentID);
+  await deleteDoc(docRef);
+}
+
 export {
   getCollectionDocuments,
   getSingleDocument,
@@ -65,4 +71,5 @@ export {
   updateDocument,
   createDocument,
   deleteFile,
+  deleteDocument,
 };

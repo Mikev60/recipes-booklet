@@ -7,6 +7,7 @@ import {
   updateDocument,
   createDocument,
   deleteFile,
+  deleteDocument,
 } from "../firebase-util";
 
 async function getRecipes() {
@@ -115,4 +116,19 @@ async function editRecipe(id, recipe, steps, mainPicture, filesToDelete) {
   });
 }
 
-export { getRecipes, addRecipe, getSingleRecipe, editRecipe };
+async function deleteRecipe(id, main_picture, steps) {
+  //Main picture deletion
+  await deleteFile(main_picture.path);
+
+  //step pictures deletion
+  for (let step of steps) {
+    for (let picture of step.pictures) {
+      await deleteFile(picture.path);
+    }
+  }
+
+  //Document deletion
+  await deleteDocument("recipes", id);
+}
+
+export { getRecipes, addRecipe, getSingleRecipe, editRecipe, deleteRecipe };

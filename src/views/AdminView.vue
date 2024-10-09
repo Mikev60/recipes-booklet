@@ -8,7 +8,7 @@
       </v-tabs>
       <v-tabs-window v-model="tab" class="pt-2">
         <v-tabs-window-item value="list">
-          <recipes-list type="admin" :recipes="recipes"></recipes-list>
+          <recipes-list @delete-recipe="initializeRecipes" type="admin" :recipes="recipes"></recipes-list>
         </v-tabs-window-item>
 
         <v-tabs-window-item value="create">
@@ -24,6 +24,7 @@ import { ref } from 'vue'
 import RecipesList from '@/components/RecipesList.vue'
 import { getRecipes } from '@/includes/collections/recipes'
 import CreateEditRecipeForm from '@/components/CreateEditRecipeForm.vue'
+import { watch } from 'vue'
 
 export default {
   name: 'AdminView',
@@ -35,16 +36,21 @@ export default {
     let tab = ref("list") // list, create
     let recipes = ref([])
 
+    watch(tab, async (newTab) => {
+      if (newTab == 'list') {
+        await initializeRecipes()
+      }
+    })
+
     async function initializeRecipes() {
       recipes.value = await getRecipes()
-
-      console.log(recipes)
     }
 
     initializeRecipes()
     return {
       tab,
-      recipes
+      recipes,
+      initializeRecipes
     }
   }
 }

@@ -1,8 +1,7 @@
 <template>
     <h2>{{ recipeToEdit.id ? `Edit a recipe` : 'Create a recipe' }}</h2>
-    <v-snackbar v-model="openSnackBar" timeout="2000" :color="alert_type"><v-icon
-            :icon="alert_type == 'success' ? 'mdi-check-circle-outline' : 'mdi-alert-circle'"></v-icon> {{
-                alert_text }}</v-snackbar>
+    <snack-bar v-model="openSnackBar" timeOut="2000" :text="snackbar_message" :type="snackbar_type"
+        :icon="snackbar_icon"></snack-bar>
     <v-form class="w-full mt-4" @submit.prevent="submitForm" ref="formRef">
         <!-- Title, Picture inputs-->
         <v-text-field :rules="rules.title.rules" label="Title" v-model="recipe_title">
@@ -60,7 +59,7 @@
                 <quill-editor theme="snow" v-model:content="step.description" contentType="html"></quill-editor>
                 <v-file-input label="Pictures" multiple v-model="temp_step_pictures"
                     @change="addStepPicture(index)"></v-file-input>
-                <div v-if="recipe.steps.length > 0">
+                <div v-if="steps?.length > 0">
                     <div class="flex flex-row" v-for="(picture, pictureIndex) in step.pictures" :key="picture.url">
                         <div class="relative"><img width="200" :src="picture.url" /><v-icon class="absolute top-0 right-0"
                                 icon="mdi-delete-circle" color="error"
@@ -85,11 +84,13 @@ import { ref, watch, shallowRef } from 'vue'
 import { addRecipe, editRecipe } from '@/includes/collections/recipes'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
+import SnackBar from '@/components/SnackBar.vue'
 
 export default {
     name: 'CreateEditRecipeForm',
     components: {
-        QuillEditor
+        QuillEditor,
+        SnackBar
     },
     props: {
         recipe: {
@@ -156,12 +157,13 @@ export default {
             },
         }
         const formRef = ref(null)
-        let alert_text = ref('')
-        let alert_type = ref('')
         let in_submission = ref(false)
         let units = ['gr', 'kg', 'L', 'ml', 'cl', 'u']
         let filesToDelete = ref([])
         let openSnackBar = ref(false)
+        let snackbar_type = ref("success")
+        let snackbar_icon = ref("mdi-check-circle-outline")
+        let snackbar_message = ref("")
 
         // Recipe value initialization
         let recipe_title = ref('')
@@ -219,7 +221,6 @@ export default {
         }
         async function submitForm() {
             in_submission.value = true
-            openSnackBar.value = true
             const recipe = {
                 title: recipe_title.value,
                 ingredients: ingredients.value
@@ -227,22 +228,23 @@ export default {
             try {
                 if (recipeToEdit.value.id) {
                     await editRecipe(recipeToEdit.value.id, recipe, steps.value, recipe_picture.value, filesToDelete.value)
-                    alert_text.value = 'You recipe has been edited';
                     filesToDelete.value = []
+                    snackbar_message.value = "Recipe has been edited"
                 } else {
                     await addRecipe(recipe, recipe_picture.value, steps.value)
                     formRef.value.reset()
                     ingredients.value = []
                     steps.value = []
-                    alert_text.value = 'You recipe has been added';
+                    recipe_picture.value = {}
+                    snackbar_message.value = "Recipe has been added"
                 }
-                alert_type.value = 'success';
-
-
+                openSnackBar.value = true
             } catch (error) {
-                alert_type.value = 'error';
-                alert_text.value = 'An error occured';
                 in_submission.value = false
+                snackbar_message.value = "An error occured"
+                snackbar_type.value = "error"
+                snackbar_icon.value = "mdi-alert-circle"
+                openSnackBar.value = true
                 console.log(error)
                 return;
             }
@@ -265,8 +267,6 @@ export default {
             removeStep,
             units,
             submitForm,
-            alert_text,
-            alert_type,
             formRef,
             in_submission,
             recipeToEdit,
@@ -275,7 +275,10 @@ export default {
             removePicture,
             temp_step_pictures,
             addStepPicture,
-            openSnackBar
+            openSnackBar,
+            snackbar_type,
+            snackbar_message,
+            snackbar_icon
         }
     }
 }

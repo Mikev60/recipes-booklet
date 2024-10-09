@@ -13,6 +13,9 @@
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
+    "@vueup/vue-quill": "^1.2.0",
+    "@wangeditor/editor": "^5.1.23",
+    "@wangeditor/editor-for-vue": "^5.1.12",
     "firebase": "^10.14.0",
     "pinia": "^2.1.7",
     "sass": "^1.79.4",

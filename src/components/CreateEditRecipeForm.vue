@@ -1,6 +1,8 @@
 <template>
     <h2>{{ recipeToEdit.id ? `Edit a recipe` : 'Create a recipe' }}</h2>
-    <v-alert :text="alert_text" :type="alert_type" v-if="show_alert"></v-alert>
+    <v-snackbar v-model="openSnackBar" timeout="2000" :color="alert_type"><v-icon
+            :icon="alert_type == 'success' ? 'mdi-check-circle-outline' : 'mdi-alert-circle'"></v-icon> {{
+                alert_text }}</v-snackbar>
     <v-form class="w-full mt-4" @submit.prevent="submitForm" ref="formRef">
         <!-- Title, Picture inputs-->
         <v-text-field :rules="rules.title.rules" label="Title" v-model="recipe_title">
@@ -48,14 +50,14 @@
             <v-container class="px-0" v-for="(step, index) in steps" :key="index">
                 <v-row align="center">
                     <v-col><v-text-field label="Title" v-model="step.title"
-                            :rules="rules.ingredient_title.rules"></v-text-field></v-col>
+                            :rules="rules.ingredient_title.rules"></v-text-field>
+                    </v-col>
                     <v-col class="flex-grow-0"><v-icon icon="mdi-delete-circle" size="x-large" color="error" class="mb-4"
                             @click.prevent="removeStep(index)"></v-icon></v-col>
 
                 </v-row>
 
-                <v-textarea label="Description" v-model="step.description"
-                    :rules="rules.step_description.rules"></v-textarea>
+                <quill-editor theme="snow" v-model:content="step.description" contentType="html"></quill-editor>
                 <v-file-input label="Pictures" multiple v-model="temp_step_pictures"
                     @change="addStepPicture(index)"></v-file-input>
                 <div v-if="recipe.steps.length > 0">
@@ -79,11 +81,16 @@
 </template>
 
 <script>
-import { ref, watch } from 'vue'
+import { ref, watch, shallowRef } from 'vue'
 import { addRecipe, editRecipe } from '@/includes/collections/recipes'
+import { QuillEditor } from '@vueup/vue-quill'
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
 export default {
     name: 'CreateEditRecipeForm',
+    components: {
+        QuillEditor
+    },
     props: {
         recipe: {
             type: Object,
@@ -149,12 +156,12 @@ export default {
             },
         }
         const formRef = ref(null)
-        let show_alert = ref(false)
         let alert_text = ref('')
         let alert_type = ref('')
         let in_submission = ref(false)
         let units = ['gr', 'kg', 'L', 'ml', 'cl', 'u']
         let filesToDelete = ref([])
+        let openSnackBar = ref(false)
 
         // Recipe value initialization
         let recipe_title = ref('')
@@ -212,6 +219,7 @@ export default {
         }
         async function submitForm() {
             in_submission.value = true
+            openSnackBar.value = true
             const recipe = {
                 title: recipe_title.value,
                 ingredients: ingredients.value
@@ -228,21 +236,16 @@ export default {
                     steps.value = []
                     alert_text.value = 'You recipe has been added';
                 }
-                show_alert.value = true;
                 alert_type.value = 'success';
 
 
             } catch (error) {
-                show_alert.value = true;
                 alert_type.value = 'error';
                 alert_text.value = 'An error occured';
                 in_submission.value = false
                 console.log(error)
                 return;
             }
-            setTimeout(() => {
-                show_alert.value = false
-            }, 2000);
             in_submission.value = false
         }
         function removePicture(stepIndex, pictureIndex) {
@@ -262,7 +265,6 @@ export default {
             removeStep,
             units,
             submitForm,
-            show_alert,
             alert_text,
             alert_type,
             formRef,
@@ -272,7 +274,8 @@ export default {
             temp_recipe_picture,
             removePicture,
             temp_step_pictures,
-            addStepPicture
+            addStepPicture,
+            openSnackBar
         }
     }
 }

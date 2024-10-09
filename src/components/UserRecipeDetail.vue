@@ -15,7 +15,9 @@
                 <div class="w-100" v-for="(step, index) in recipeObject.steps" :key="index">
                     <v-expansion-panel :title="`Step ${index + 1} : ${step.title}`">
                         <v-expansion-panel-text class="flex flex-col ">
-                            <v-row class="mt-1">{{ step.description }}</v-row>
+                            <v-row class="mt-1">
+                                <div v-html="step.description"></div>
+                            </v-row>
                             <v-container class="mt-2 max-w-2">
                                 <v-row class="mt-1"><v-carousel>
                                         <v-carousel-item v-for="picture in step.pictures" :src="picture.url"

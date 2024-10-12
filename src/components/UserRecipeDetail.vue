@@ -6,7 +6,13 @@
             <v-img :src="recipeObject.main_picture?.url" max-width="60%" height="400px" class="mx-auto mt-2"></v-img>
             <h2>Ingredients </h2>
             <v-list lines="one">
-                <v-list-item v-for="ingredient in recipeObject.ingredients" :key="ingredient.name">
+                <v-list-item v-if="recipeObject?.categories?.length > 0" v-for="category in ingredientsPerCategory"
+                    :key="category.title">
+                    <h3>{{ category.category.title }}</h3>
+                    <p v-for="ingredient in category.ingredients" :key="ingredient.title">
+                        {{ ingredient.title }} ({{ ingredient.quantity }} {{ ingredient.unit }})</p>
+                </v-list-item>
+                <v-list-item v-else v-for="ingredient in recipeObject.ingredients" :key="ingredient.title">
                     {{ ingredient.title }} ({{ ingredient.quantity }} {{ ingredient.unit }})
                 </v-list-item>
             </v-list>
@@ -42,16 +48,25 @@ export default {
         let route = useRoute()
         let recipeId = route.params.id
         let recipeObject = ref({})
+        let ingredientsPerCategory = ref([])
         let exam_mode = ref(false)
 
         async function initializeRecipe() {
             recipeObject.value = await getSingleRecipe(recipeId);
+            if (recipeObject.value?.categories?.length > 0) {
+                recipeObject.value.categories.forEach((category) => {
+                    ingredientsPerCategory.value.push({
+                        category,
+                        ingredients: recipeObject.value.ingredients.filter((ingredient) => ingredient.category.title == category.title)
+                    })
+                })
+            }
+
         }
 
         initializeRecipe()
-        console.log(recipeObject.value)
 
-        return { recipeObject, exam_mode }
+        return { recipeObject, exam_mode, ingredientsPerCategory }
     }
 }
 </script>

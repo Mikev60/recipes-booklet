@@ -14,6 +14,23 @@
         <v-container class="px-0 mx-0 w-full">
             <v-row align-content="end" justify="end">
                 <v-col col="1">
+                    <h3>Ingredients categories</h3>
+                </v-col>
+                <v-col align-self="end"><v-icon icon="mdi-plus" @click.prevent="addIngredientCategory"
+                        class="items-end"></v-icon></v-col>
+            </v-row>
+            <v-row align="center" v-for="(ingredientCategory, index) in ingredientsCategories" :key="index">
+                <v-col>
+                    <v-text-field label="Category" v-model="ingredientCategory.title"
+                        :rules="rules.ingredient_title.rules"></v-text-field>
+                </v-col>
+                <v-col class="d-flex flex-column flex-grow-0 flex-shrink-0">
+                    <v-icon icon="mdi-delete-circle" size="x-large" color="error" class="mb-4"
+                        @click.prevent="removeIngredientCategory(index)"></v-icon>
+                </v-col>
+            </v-row>
+            <v-row align-content="end" justify="end">
+                <v-col col="1">
                     <h3>Ingredients</h3>
                 </v-col>
                 <v-col align-self="end"><v-icon icon="mdi-plus" @click.prevent="addIngredient"
@@ -30,6 +47,10 @@
                 </v-col>
                 <v-col>
                     <v-combobox label="Unit" :items="units" v-model="ingredient.unit"
+                        :rules="rules.ingredient_unit.rules"></v-combobox>
+                </v-col>
+                <v-col v-if="ingredientsCategories?.length > 0">
+                    <v-combobox label="Category" :items="ingredientsCategories" v-model="ingredient.category"
                         :rules="rules.ingredient_unit.rules"></v-combobox>
                 </v-col>
                 <v-col class="d-flex flex-column flex-grow-0 flex-shrink-0">
@@ -172,6 +193,7 @@ export default {
         let recipe_picture = ref(null)
         let recipeToEdit = ref(props.recipe || {})
         let ingredients = ref([])
+        let ingredientsCategories = ref([])
         let steps = ref([])
         watch(() => props.recipe, (newRecipe) => { //Change recipe when props is initialized
             recipeToEdit.value = newRecipe
@@ -179,6 +201,7 @@ export default {
             recipe_picture.value = recipeToEdit.value.main_picture
             steps.value = recipeToEdit.value.steps
             ingredients.value = recipeToEdit.value.ingredients
+            ingredientsCategories.value = recipeToEdit.value.categories
         })
 
         function addMainPicture() {
@@ -201,9 +224,18 @@ export default {
             const ingredientTemplate = {
                 name: '',
                 quantity: 0,
-                unit: ''
+                unit: '',
+                category: ''
             }
             ingredients.value.push(ingredientTemplate)
+        }
+        function addIngredientCategory() {
+            ingredientsCategories.value.push({
+                title: ''
+            })
+        }
+        function removeIngredientCategory(index) {
+            ingredientsCategories.value.splice(index, 1)
         }
         function removeIngredient(index) {
             ingredients.value.splice(index, 1)
@@ -223,7 +255,8 @@ export default {
             in_submission.value = true
             const recipe = {
                 title: recipe_title.value,
-                ingredients: ingredients.value
+                ingredients: ingredients.value,
+                categories: ingredientsCategories.value
             }
             try {
                 if (recipeToEdit.value.id) {
@@ -278,7 +311,10 @@ export default {
             openSnackBar,
             snackbar_type,
             snackbar_message,
-            snackbar_icon
+            snackbar_icon,
+            ingredientsCategories,
+            addIngredientCategory,
+            removeIngredientCategory
         }
     }
 }

@@ -4,6 +4,18 @@
             <h1>{{ recipeObject.title }} </h1>
             <v-switch label="Exam mode" v-model="exam_mode" color="primary"></v-switch>
             <v-img :src="recipeObject.main_picture?.url" max-width="60%" height="400px" class="mx-auto mt-2"></v-img>
+            <div v-if="recipeObject.to_do_before">
+                <h2>To do before</h2>
+                <p v-html="recipeObject.to_do_before"></p>
+            </div>
+            <div v-if="recipeObject.material">
+                <h2>Material needed</h2>
+                <p v-html="recipeObject.material"></p>
+            </div>
+            <div v-if="recipeObject.warning" class="mb-2">
+                <h2>Warning</h2>
+                <p v-html="recipeObject.warning"></p>
+            </div>
             <h2>Ingredients </h2>
             <v-list lines="one">
                 <v-list-item v-if="recipeObject?.categories?.length > 0" v-for="category in ingredientsPerCategory"

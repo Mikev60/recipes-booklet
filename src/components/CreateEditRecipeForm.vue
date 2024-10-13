@@ -10,6 +10,15 @@
         <v-file-input preprend-icon="mdi-camera" label="Picture" @change="addMainPicture"
             v-model="temp_recipe_picture"></v-file-input>
         <img :src="recipe_picture.url" width="200" v-if="recipe_picture?.url" />
+        <v-switch label="Add a material section" v-model="materialSection" color="primary"></v-switch>
+        <quill-editor v-if="materialSection" theme="snow" v-model:content="materialSectionContent"
+            contentType="html"></quill-editor>
+        <v-switch label="Add a warning section" v-model="warningSection" color="primary"></v-switch>
+        <quill-editor v-if="warningSection" theme="snow" v-model:content="warningSectionContent"
+            contentType="html"></quill-editor>
+        <v-switch label="Add a to do before section" v-model="toDoBeforeSection" color="primary"></v-switch>
+        <quill-editor v-if="toDoBeforeSection" theme="snow" v-model:content="toDoBeforeSectionContent"
+            contentType="html"></quill-editor>
         <!-- Ingredients-->
         <v-container class="px-0 mx-0 w-full">
             <v-row align-content="end" justify="end">
@@ -185,6 +194,10 @@ export default {
         let snackbar_type = ref("success")
         let snackbar_icon = ref("mdi-check-circle-outline")
         let snackbar_message = ref("")
+        let toDoBeforeSection = ref(false)
+
+        let warningSection = ref(false)
+        let materialSection = ref(false)
 
         // Recipe value initialization
         let recipe_title = ref('')
@@ -195,6 +208,9 @@ export default {
         let ingredients = ref([])
         let ingredientsCategories = ref([])
         let steps = ref([])
+        let toDoBeforeSectionContent = ref(null)
+        let warningSectionContent = ref(null)
+        let materialSectionContent = ref(null)
         watch(() => props.recipe, (newRecipe) => { //Change recipe when props is initialized
             recipeToEdit.value = newRecipe
             recipe_title.value = recipeToEdit.value.title
@@ -202,6 +218,12 @@ export default {
             steps.value = recipeToEdit.value.steps
             ingredients.value = recipeToEdit.value.ingredients
             ingredientsCategories.value = recipeToEdit.value.categories
+            toDoBeforeSectionContent.value = recipeToEdit.value.to_do_before
+            warningSectionContent.value = recipeToEdit.value.warning
+            materialSectionContent.value = recipeToEdit.value.material
+            if (toDoBeforeSectionContent.value) toDoBeforeSection.value = true
+            if (warningSectionContent.value) warningSection.value = true
+            if (materialSectionContent.value) materialSection.value = true
         })
 
         function addMainPicture() {
@@ -256,7 +278,10 @@ export default {
             const recipe = {
                 title: recipe_title.value,
                 ingredients: ingredients.value,
-                categories: ingredientsCategories.value
+                categories: ingredientsCategories.value,
+                material: materialSectionContent.value ? materialSectionContent.value : null,
+                warning: warningSectionContent.value ? warningSectionContent.value : null,
+                to_do_before: toDoBeforeSectionContent.value ? toDoBeforeSectionContent.value : null
             }
             try {
                 if (recipeToEdit.value.id) {
@@ -314,7 +339,13 @@ export default {
             snackbar_icon,
             ingredientsCategories,
             addIngredientCategory,
-            removeIngredientCategory
+            removeIngredientCategory,
+            toDoBeforeSection,
+            toDoBeforeSectionContent,
+            materialSection,
+            materialSectionContent,
+            warningSection,
+            warningSectionContent
         }
     }
 }
